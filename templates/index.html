@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function makeMove(row, col) {
+            const size = document.getElementById("size").value;
+            fetch("/move", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({row: row, col: col, size: size})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.winner) {
+                    alert("Winner: " + data.winner);
+                    window.location.href = "/reset";
+                } else {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Tic Tac Toe</h1>
+    <form action="/" method="post">
+        <label for="difficulty">Choose difficulty:</label>
+        <select name="level" id="difficulty" onchange="this.form.submit()">
+            <option value="easy" {% if difficulty == 'easy' %}selected{% endif %}>Easy</option>
+            <option value="normal" {% if difficulty == 'normal' %}selected{% endif %}>Normal</option>
+            <option value="expert" {% if difficulty == 'expert' %}selected{% endif %}>Expert</option>
+        </select>
+    </form>
+    <div class="game-container">
+        <div class="board">
+            {% for row_idx, row in enumerate(board) %}
+                <div class="row">
+                    {% for col_idx, cell in enumerate(row) %}
+                        <div class="cell" onclick="makeMove({{ row_idx }}, {{ col_idx }})">
+                            {% if cell[0] == 'X' %}
+                                <div class="cross cross-{{ cell[1] }}"></div>
+                            {% elif cell[0] == 'O' %}
+                                <div class="circle circle-{{ cell[1] }}"></div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+        <div class="player-info">
+            <div class="player1">
+                <h2>Player 1</h2>
+                <div class="figures">
+                    <div class="cross cross-S"></div>
+                    <div class="cross cross-M"></div>
+                    <div class="cross cross-L"></div>
+                </div>
+            </div>
+            <div class="player2">
+                <h2>Player 2</h2>
+                <div class="figures">
+                    <div class="circle circle-S"></div>
+                    <div class="circle circle-M"></div>
+                    <div class="circle circle-L"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form>
+        <label for="size">Choose size:</label>
+        <select id="size" name="size">
+            <option value="S">Small</option>
+            <option value="M">Medium</option>
+            <option value="L">Large</option>
+        </select>
+    </form>
+    <a href="/reset">Reset Game</a>
+</body>
+</html>
